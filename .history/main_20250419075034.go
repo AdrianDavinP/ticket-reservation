@@ -1,0 +1,55 @@
+package main
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"os"
+
+	"ticket-reservation/internal/handler"
+	"ticket-reservation/internal/repository"
+	"ticket-reservation/internal/server"
+	"ticket-reservation/internal/service"
+
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+)
+
+func main() {
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	// Membaca variabel lingkungan dari .env
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
+	sslmode := os.Getenv("DB_SSLMODE")
+
+	// Membuat connection string
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", host, port, user, password, dbname, sslmode)
+
+	// Membuka koneksi ke database PostgreSQL
+	db, err := sql.Open("postgres", connStr)
+
+	// Set up the database connection
+	db, err := sql.Open("postgres", "host=localhost port=5432 user=admin password=secret dbname=concert_db sslmode=disable")
+	if err != nil {
+		log.Fatalf("Error opening database: %v", err)
+	}
+	defer db.Close()
+
+	// Set up repository and service layer
+	repo := repository.NewConcertRepo(db)
+	svc := service.NewBookingService(db, repo)
+
+	// Create gRPC handler that implements pb.ConcertServiceServer
+	grpcHandler := handler.NewGrpcHandler(svc)
+
+	// Start gRPC server
+	server.StartGRPCServer(grpcHandler)
+}

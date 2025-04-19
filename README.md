@@ -1,0 +1,4 @@
+1. Export database dari file.sql
+2. untuk unit test dilakukan di layer service & repository, untuk test level service diwajibkan ada 1 data di table concert dg ID 1
+3. GRPC di set running di port 50051
+4. to handle concurrent booking request i use select FOR UPDATE method
