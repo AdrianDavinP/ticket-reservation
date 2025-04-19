@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 	"time"
 
 	"ticket-reservation/internal/model"
@@ -13,6 +14,11 @@ import (
 type BookingService struct {
 	DB   *sql.DB
 	Repo *repository.ConcertRepo
+}
+
+type BookingServiceInterface interface {
+	GetConcerts(ctx context.Context, name string) ([]model.Concert, error)
+	BookTicket(ctx context.Context, concertID, userID, quantity int) (string, error)
 }
 
 func NewBookingService(db *sql.DB, repo *repository.ConcertRepo) *BookingService {
@@ -62,6 +68,7 @@ func (s *BookingService) BookTicket(ctx context.Context, concertID, userID, quan
 	}
 
 	if err := tx.Commit(); err != nil {
+		log.Printf("Failed to commit transaction: %v", err)
 		return "FAILED", err
 	}
 

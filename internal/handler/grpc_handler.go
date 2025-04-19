@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"ticket-reservation/internal/service"
 	"ticket-reservation/pb"
@@ -43,7 +44,7 @@ func (h *GrpcHandler) BookTicket(ctx context.Context, req *pb.BookRequest) (*pb.
 	if err != nil {
 		return &pb.BookResponse{
 			Status:  status,
-			Message: err.Error(),
+			Message: fmt.Sprintf("Error: %v", err),
 		}, nil
 	}
 
